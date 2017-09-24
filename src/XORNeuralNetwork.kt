@@ -8,27 +8,26 @@
 
 fun main(args: Array<String>) {
 
-    val trainingData = Array(3, {IntArray(4)})
+    val inputs = Array(3, {IntArray(4)})
+    val trainingData = Array(1, {IntArray(4)})
 
+    inputs[0][0] = 0; inputs[1][0] = 0; inputs[2][0] = 1
     trainingData[0][0] = 0
-    trainingData[1][0] = 0
-    trainingData[2][0] = 0
 
-    trainingData[0][1] = 0
-    trainingData[1][1] = 1
-    trainingData[2][1] = 1
+    inputs[0][1] = 0; inputs[1][1] = 1; inputs[2][1] = 1
+    trainingData[0][1] = 1
 
+    inputs[0][2] = 1; inputs[1][2] = 0; inputs[2][2] = 1
     trainingData[0][2] = 1
-    trainingData[1][2] = 0
-    trainingData[2][2] = 1
 
-    trainingData[0][3] = 1
-    trainingData[1][3] = 1
-    trainingData[2][3] = 0
+    inputs[0][3] = 1
+    inputs[1][3] = 1
+    inputs[2][3] = 1
+    trainingData[0][3] = 0
 
     val neuronOfLayers = ArrayList<Int>()
-    neuronOfLayers.add(2)
-        neuronOfLayers.add(4)
+    neuronOfLayers.add(3) // inputs + bias
+        neuronOfLayers.add(3)
         //neuronOfLayers.add(4)
         //neuronOfLayers.add(3)
     neuronOfLayers.add(1)
@@ -39,20 +38,21 @@ fun main(args: Array<String>) {
     println("FORWARD PROPAGATION SEQUENCE STARTED")
     println()
 
-    for (j in 1..100) {
+    for (j in 1..20) {
         println("Cycle number $j of training data set")
         println()
         for (i in 0..3) { // 0 .. 3
             println("Data updated with data number ${i+1}")
             neuralNet.refreshTrainingData()
-            neuralNet.inputValues.add(trainingData[0][i].toFloat())
-            neuralNet.inputValues.add(trainingData[1][i].toFloat())
-            neuralNet.expectedOutputValues.add(trainingData[2][i].toFloat())
+            neuralNet.inputValues.add(inputs[0][i].toFloat())
+            neuralNet.inputValues.add(inputs[1][i].toFloat())
+            neuralNet.inputValues.add(inputs[2][i].toFloat())
+            neuralNet.expectedOutputValues.add(trainingData[0][i].toFloat())
             neuralNet.forwardPropagate()
             neuralNet.backPropagate()
-            println("Input data (${trainingData[0][i].toFloat()}, ${trainingData[1][i].toFloat()}) resulted in ${neuralNet.actualOutputValues[0]}")
-            println("Expected output value: ${trainingData[2][i].toFloat()} ")
-            println("Error: ${trainingData[2][i].toFloat() - neuralNet.actualOutputValues[0]} ")
+            println("Input data (${inputs[0][i].toFloat()}, ${inputs[1][i].toFloat()}) resulted in ${neuralNet.actualOutputValues[0]}")
+            println("Expected output value: ${trainingData[0][i].toFloat()} ")
+            println("Error: ${trainingData[0][i].toFloat() - neuralNet.actualOutputValues[0]} ")
             println()
         }
     }
@@ -165,7 +165,7 @@ class Neuron(val layer: Layer, val network: NeuralNetwork) {
             for (neuron in network.layers[layer.number-1].neurons) {
                 if (neuron.activatedValue != 0f) {
                     println("    NEURON ACTIVATED VALUE BEING DIVIDED BY IS ${neuron.activatedValue} and addition is ${deltaHiddenSum / neuron.activatedValue}")
-                    neuron.outputWeights[layer.neurons.indexOf(this)] =  neuron.outputWeights[layer.neurons.indexOf(this)] + deltaHiddenSum / (neuron.activatedValue)
+                    neuron.outputWeights[layer.neurons.indexOf(this)] =  neuron.outputWeights[layer.neurons.indexOf(this)] + (deltaHiddenSum / (neuron.activatedValue)) * 20
                 }
                 println("        PREVIOUS NEURON OUTPUT WEIGHTS : ${neuron.outputWeights[layer.neurons.indexOf(this)]}")
             }
@@ -173,4 +173,4 @@ class Neuron(val layer: Layer, val network: NeuralNetwork) {
     }
 }
 fun sigmoidActivation(x: Float): Float = 1f / (1 + Math.pow(Math.E, -x.toDouble())).toFloat()
-fun sigmoidPrime(x: Float): Float = (Math.pow(Math.E, x.toDouble()) / Math.pow((Math.pow(Math.E, x.toDouble()) + 1), 2.0)).toFloat()
+fun sigmoidPrime(x: Float): Float = x * (1 - x)//(Math.pow(Math.E, x.toDouble()) / Math.pow((Math.pow(Math.E, x.toDouble()) + 1), 2.0)).toFloat()
